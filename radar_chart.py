@@ -115,7 +115,7 @@ class RadarMaker():
         """
         会話を始めた回数からスコア算出
         100 * (相手) / (自分) + (相手)の値が
-        0 ~ 55 までなら100点
+        55 ~ 100 までなら100点
         そこからx離れるごとにx*x^(1/2)ずつスコアが減少
         """
         target_start = data_dict["talk_start_count"][data_dict["target_name"]]
@@ -129,12 +129,23 @@ class RadarMaker():
         else:
             return 100
 
-    def good_feeling_score(self, data_dict:dict, max_length=3):
+    def good_feeling_score(self, data_dict:dict, max_length=5):
         """
         脈ありワードの個数によって得点をつける
+        デートか何かのお誘いで80点
+        恋人等の確認で20点
         """
-        good_feeling_count = len(data_dict['lovers_check']) + len(data_dict['asking_date'])
-        return np.max([0, int(100 * good_feeling_count / max_length)])
+        score = 0
+        date_count = len(data_dict['asking_date'])
+        if date_count >= max_length:
+            score += 80
+        else:
+            score += int(80 * date_count / max_length)
+
+        lovers_check = len(data_dict['lovers_check'])
+        if lovers_check != 0:
+            score += 20
+        return score
 
     def saver_radar(self):
         data_dict = self.load_jsonl(self.score_path, has_index=False)[-1]
