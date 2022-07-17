@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# 追加
+memo.txt
+favorability_checker.ipynb
