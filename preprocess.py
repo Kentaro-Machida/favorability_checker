@@ -2,16 +2,26 @@
 Lineから読み込んだトーク履歴のテキストファイルを読み込み、
 csvファイルにして出力する前処理関数
 """
+from fileinput import filename
 import pandas as pd
 from datetime import datetime as dt
 import json
+import os
 
 class Preprocesser():
-    def __init__(self, txt_path, meta_path):
-        self.txt_path = txt_path
-        self.meta_path = meta_path
+    """
+    txt_dir: 生データのテキストのディレクトリ
+    meta_dir: メタデータのディレクトリ
+    id: データid
+    """
+    def __init__(self, txt_dir, meta_dir, id:int):
+        file_name = "raw_" + str(id) + ".txt"
+        meta_name = "meta_data.jsonl"
+        self.txt_path = os.path.join(txt_dir, file_name)
+        self.meta_path = os.path.join(meta_dir, meta_name)
         self.df = pd.DataFrame({})  
         self.text_list = []  # 行を要素する生データのリスト
+        self.id = id  # テキストid
 
     def get_basic_df(self)-> pd.DataFrame:
         """
@@ -139,39 +149,69 @@ class Preprocesser():
             current_pointer += 1    
         self.df['interval[h]'] = interval_list
                     
-        
-    def save_as_csv(self, out_path='./processed_data/sample.csv'):
+    def save_as_csv(self, out_dir='./processed_data'):
         # 前処理済みデータをcsvで書き出し
+        name = "processed_" + str(self.id) + ".csv"
+        out_path = os.path.join(out_dir, name)
         self.df.to_csv(out_path,index=None, encoding='utf-8')
+
+    def dump_jsonl(self, data, output_path, append=False):
+        """
+        Write list of objects to a JSON lines file.
+        """
+        mode = 'a+' if append else 'w'
+        with open(output_path, mode, encoding='utf-8') as f:
+            for line in data:
+                json_record = json.dumps(line, ensure_ascii=False)
+                f.write(json_record + '\n')
+
+    def load_jsonl(self, input_path, has_index=True) -> list:
+        """
+        Read list of objects from a JSON lines file.
+        """
+        data = []
+        with open(input_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                if has_index:
+                    json_l = json.loads(line.rstrip('\n|\r'))
+                    # hack ... 
+                    v = list(json_l.values())[0]
+                    data.append(v)
+                else:
+                    data.append(json.loads(line.rstrip('\n|\r')))
+        return data
 
     def save_meta_data(self):
         # 名前やファイルなどのメタデータをjsonで書き出し
-        name = self.text_list[0][7:-8]
-        target_name = list(self.df['from'].unique())
-        target_name.remove(name)
+        target_name = self.text_list[0][7:-8]
+        name = list(self.df['from'].unique())
+        name.remove(target_name)
         save_date = self.text_list[1][5:-7]
         save_time = self.text_list[1][-6:-1]
         meta_dict = {
+            "id": self.id,
             "file_path": self.txt_path,
-            "usr_name": name,
-            "target_name": target_name[0],
+            "usr_name": name[0],
+            "target_name": target_name,
             "save_date": save_date,
             "save_time": save_time
         }
-        with open(self.meta_path, "w", encoding='utf-8') as f:
-            json.dump(meta_dict, f, ensure_ascii=False)
-
+        json_list = self.load_jsonl(self.meta_path, has_index=False)
+        json_list.append(meta_dict)
+        self.dump_jsonl(json_list, self.meta_path)
 
     def do_all_preprocess(self):
         df = self.get_basic_df()
         self.add_each_time()
         self.add_flags_interval()
         self.save_as_csv()
+        self.save_meta_data()
 
 def test_func():
-    preprocesser = Preprocesser('./raw_data/sample.txt',
-     "./meta_data/sample.json")
+    preprocesser = Preprocesser('./raw_data',
+     "./meta_data", id = 0)
     preprocesser.do_all_preprocess()
     preprocesser.save_meta_data()
 
-test_func()
+if __name__=='__main__':
+     test_func()

@@ -3,28 +3,58 @@
 総合および、項目別のスコアJSON形式で出力する
 """
 
+from operator import index
 import pandas as pd
 import numpy as np
 import json
 import re
+import os
 from dataclasses import dataclass
+
+def dump_jsonl(data, output_path, append=False):
+    """
+    Write list of objects to a JSON lines file.
+    """
+    mode = 'a+' if append else 'w'
+    with open(output_path, mode, encoding='utf-8') as f:
+        for line in data:
+            json_record = json.dumps(line, ensure_ascii=False)
+            f.write(json_record + '\n')
+
+def load_jsonl(input_path, has_index=True) -> list:
+    """
+    Read list of objects from a JSON lines file.
+    """
+    data = []
+    with open(input_path, 'r', encoding='utf-8') as f:
+        for line in f:
+            if has_index:
+                json_l = json.loads(line.rstrip('\n|\r'))
+                # hack ... 
+                v = list(json_l.values())[0]
+                data.append(v)
+            else:
+                data.append(json.loads(line.rstrip('\n|\r')))
+    return data
 
 @dataclass
 class FavorabilityGetter():
-    output_json_path:str = "./socres/sample_score.json"
-    input_csv_path:str = "./processed_data/sample.csv"
-    meta_path:str = "./meta_data/sample.json"
-    id:int = -1
+    output_json_path:str = "./socres/score.jsonl"
+    input_csv_dir:str = "./processed_data"
+    meta_path:str = "./meta_data/meta_data.jsonl"
+    id:int = 0
 
     def __post_init__(self):
-        self.df = pd.read_csv(self.input_csv_path)
         self.favorability = 0.0  # 脈ありスコア
         self.indifference = 0.0  # 脈なしスコア
         self.analysis_dict = {}  # 分析結果を辞書で保持
         self.analysis_dict['id'] = self.id
+        self.input_file_name = "processed_" + str(self.id) +".csv"
+        self.input_csv_path = os.path.join(self.input_csv_dir, self.input_file_name)
+        self.df = pd.read_csv(self.input_csv_path)
 
-        with open(self.meta_path, "r", encoding='utf-8') as f:
-            self.meta_dict = json.load(f)
+        json_list = load_jsonl(self.meta_path, has_index=False)
+        self.meta_dict = json_list[-1]
 
         self.analysis_dict['usr_name'] = self.meta_dict['usr_name']
         self.analysis_dict['target_name'] = self.meta_dict['target_name']
@@ -283,36 +313,31 @@ class FavorabilityGetter():
 
         self.analysis_dict['interval_average'] = interval_mean_dict
 
-def dump_jsonl(data, output_path, append=False):
-    """
-    Write list of objects to a JSON lines file.
-    """
-    mode = 'a+' if append else 'w'
-    with open(output_path, mode, encoding='utf-8') as f:
-        for line in data:
-            json_record = json.dumps(line, ensure_ascii=False)
-            f.write(json_record + '\n')
-    print('Wrote {} records to {}'.format(len(data), output_path))    
+    def all_caluculate(self):
+        self.specify_period(36)
+        self.question_check()
+        self.conversation_count_check()
+        self.conversation_density_check()
+        self.string_length_check()
+        self.call_check()
+        self.lovers_check()
+        self.conversation_start_check()
+        self.interval_balance_check()
+        self.asking_date_check()
+        
+        self.analysis_dict['favorability'] = self.favorability
+        self.analysis_dict['indifference'] = self.indifference
+        self.analysis_dict['total_score'] = int(100*np.exp(self.favorability)\
+            /(np.exp(self.favorability) + np.exp(self.indifference))
+        )
 
-def load_jsonl(input_path, has_index=True) -> list:
-    """
-    Read list of objects from a JSON lines file.
-    """
-    data = []
-    with open(input_path, 'r', encoding='utf-8') as f:
-        for line in f:
-            if has_index:
-                json_l = json.loads(line.rstrip('\n|\r'))
-                # hack ... 
-                v = list(json_l.values())[0]
-                data.append(v)
-            else:
-                data.append(json.loads(line.rstrip('\n|\r')))
-    print('Loaded {} records from {}'.format(len(data), input_path))
-    return data
+        output_json_path = './score_output/score.jsonl'
+        json_list = load_jsonl(output_json_path, has_index=False)
+        json_list.append(self.analysis_dict)
+        dump_jsonl(json_list, output_json_path, append=False)
 
-def main():
-    getter = FavorabilityGetter()
+def test():
+    getter = FavorabilityGetter(id = 0)
     getter.specify_period(36)
     getter.question_check()
     getter.conversation_count_check()
@@ -334,9 +359,9 @@ def main():
     print("-",getter.indifference)
     print(getter.analysis_dict)
 
-    output_json_path = './score_output/score_sample.jsonl'
+    output_json_path = './score_output/score.jsonl'
     json_list = load_jsonl(output_json_path, has_index=False)
     json_list.append(getter.analysis_dict)
     dump_jsonl(json_list, output_json_path, append=False)
 if __name__=='__main__':
-    main()
+    test()
