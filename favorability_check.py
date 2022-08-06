@@ -3,7 +3,6 @@
 総合および、項目別のスコアJSON形式で出力する
 """
 
-from operator import index
 import pandas as pd
 import numpy as np
 import json
@@ -337,6 +336,7 @@ class FavorabilityGetter():
         json_list = load_jsonl(output_json_path, has_index=False)
         json_list.append(self.analysis_dict)
         dump_jsonl(json_list, output_json_path, append=False)
+        return self.analysis_dict
 
 def test():
     getter = FavorabilityGetter(id = "0")
