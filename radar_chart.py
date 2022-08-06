@@ -4,7 +4,7 @@ import json
 import japanize_matplotlib
 
 class RadarMaker():
-    def __init__(self,score_path:str ,id:int):
+    def __init__(self,score_path:str ,id:str):
         self.id = id
         self.score_path = score_path
 

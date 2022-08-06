@@ -42,7 +42,7 @@ class FavorabilityGetter():
     output_json_path:str = "./socres/score.jsonl"
     input_csv_dir:str = "./processed_data"
     meta_path:str = "./meta_data/meta_data.jsonl"
-    id:int = 0
+    id:str = '0'
 
     def __post_init__(self):
         self.favorability = 0.0  # 脈ありスコア
@@ -232,20 +232,22 @@ class FavorabilityGetter():
         self.favorability += score
         self.analysis_dict['call'] = call_count
 
-    def lovers_check(self, added_score=0.5):
+    def lovers_check(self, added_score=10, full_score_length=1)->int:
         """
         相手に恋人がいるかどうかの確認が行われているかどうかを評価する。
-        行われていたら脈アリに0.5追加
+        脈ありなテキストは他のスコア算出とは独立させる。
         """
         pattern_text = ".*(彼氏|彼女|恋人|彼|好きな人|すきな人|気になる人)\
             .*(いる|いつ|いない|います).*(\?|？).*"
         
         lovers_check_list = self.get_pattern_match(pattern_text)
-        if len(lovers_check_list) > 0:
-            self.favorability+=added_score
         self.analysis_dict["lovers_check"] = lovers_check_list
+        if len(lovers_check_list) >= full_score_length:
+            return added_score
+        else:
+            return 0
 
-    def asking_date_check(self, added_score=2):
+    def asking_date_check(self, added_score=10, full_score_length=3):
         """
         デート的なものに誘われたものを探す
         """
@@ -258,11 +260,11 @@ class FavorabilityGetter():
         pattern_text = ".*(見に|食べ|しに|のみ|飲み|呑み).*\
             (よう|こう|ましょう|いこ|行こ)"
         matched_list.extend(self.get_pattern_match(pattern_text))
-
-        if len(matched_list) > 2:
-            self.favorability += added_score
-
         self.analysis_dict['asking_date'] = matched_list
+        if len(matched_list) >= full_score_length:
+            return added_score
+        else:
+            return added_score * len(matched_list) / full_score_length
 
     def conversation_start_check(self, thresh=0.4):
         """
@@ -320,16 +322,16 @@ class FavorabilityGetter():
         self.conversation_density_check()
         self.string_length_check()
         self.call_check()
-        self.lovers_check()
         self.conversation_start_check()
         self.interval_balance_check()
-        self.asking_date_check()
+        lovers_addition = self.lovers_check()
+        date_addition = self.asking_date_check()
         
         self.analysis_dict['favorability'] = self.favorability
         self.analysis_dict['indifference'] = self.indifference
-        self.analysis_dict['total_score'] = int(100*np.exp(self.favorability)\
+        self.analysis_dict['total_score'] = int(80*np.exp(self.favorability)\
             /(np.exp(self.favorability) + np.exp(self.indifference))
-        )
+        ) + lovers_addition + date_addition
 
         output_json_path = './score_output/score.jsonl'
         json_list = load_jsonl(output_json_path, has_index=False)
@@ -337,7 +339,7 @@ class FavorabilityGetter():
         dump_jsonl(json_list, output_json_path, append=False)
 
 def test():
-    getter = FavorabilityGetter(id = 0)
+    getter = FavorabilityGetter(id = "0")
     getter.specify_period(36)
     getter.question_check()
     getter.conversation_count_check()
