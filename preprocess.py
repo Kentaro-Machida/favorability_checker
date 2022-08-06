@@ -14,7 +14,7 @@ class Preprocesser():
     meta_dir: メタデータのディレクトリ
     id: データid
     """
-    def __init__(self, txt_dir, meta_dir, id:int):
+    def __init__(self, txt_dir, meta_dir, id:str):
         file_name = "raw_" + str(id) + ".txt"
         meta_name = "meta_data.jsonl"
         self.txt_path = os.path.join(txt_dir, file_name)
