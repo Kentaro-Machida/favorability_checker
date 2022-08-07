@@ -1,8 +1,6 @@
-from json import load
 from favorability_check import FavorabilityGetter
 from preprocess import Preprocesser
 from radar_chart import RadarMaker
-from json_function import load_jsonl, dump_jsonl
 
 import os
 import uuid
@@ -76,5 +74,5 @@ def upload_file():
     </form>
     '''
 
-if name=='__main__':
+if __name__=='__main__':
     app.run()
