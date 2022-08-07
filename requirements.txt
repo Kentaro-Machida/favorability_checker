@@ -42,3 +42,4 @@ wcwidth==0.2.5
 Werkzeug==2.2.1
 zipp==3.8.1
 zope.interface==5.4.0
+matplotlib==3.3.2
