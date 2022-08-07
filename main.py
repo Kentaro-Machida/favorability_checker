@@ -76,4 +76,5 @@ def upload_file():
     </form>
     '''
 
-app.run(port='8000')
+if name=='__main__':
+    app.run()
