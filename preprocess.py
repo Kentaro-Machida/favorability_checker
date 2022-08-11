@@ -32,6 +32,7 @@ class Preprocesser():
             self.text_list = f.readlines()
         day_change_row = []  # 日が変わる行数のリスト
         for row,line in enumerate(self.text_list):
+            # 改行かつ、改行の次行に西暦が入っていたら日付の変更
             if line == '\n' and self.text_list[row + 1].find('20') == 0:
                 day_change_row.append(row)
         
@@ -49,11 +50,11 @@ class Preprocesser():
                 for all_text in self.text_list[day_start:day_end]:  # 注目日のテキストリスト
                     text_per_time = all_text.split(sep='\t')  # 送信時間ごとに分割
                     #  改行されている同一テキストの連結
-                    if(len(text_per_time) == 1):
+                    if(len(text_per_time) == 1): # 改行の時は前の文に追加
                         processed_text_list[-1] = \
                         processed_text_list[-1] + \
                         text_per_time[0].replace("\n","").replace("\"", "")
-                    else:
+                    elif len(text_per_time) > 2:  # そうでなければ、前処理して追加
                         time_list.append(text_per_time[0])
                         from_list.append(text_per_time[1])
                         all_day_list.append(day_str.replace('\n', ''))
