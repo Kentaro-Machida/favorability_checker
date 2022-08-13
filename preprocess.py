@@ -7,6 +7,7 @@ import pandas as pd
 from datetime import datetime as dt
 import json
 import os
+from json_function import load_jsonl, dump_jsonl
 
 class Preprocesser():
     """
@@ -157,32 +158,6 @@ class Preprocesser():
         out_path = os.path.join(out_dir, name)
         self.df.to_csv(out_path,index=None, encoding='utf-8')
 
-    def dump_jsonl(self, data, output_path, append=False):
-        """
-        Write list of objects to a JSON lines file.
-        """
-        mode = 'a+' if append else 'w'
-        with open(output_path, mode, encoding='utf-8') as f:
-            for line in data:
-                json_record = json.dumps(line, ensure_ascii=False)
-                f.write(json_record + '\n')
-
-    def load_jsonl(self, input_path, has_index=True) -> list:
-        """
-        Read list of objects from a JSON lines file.
-        """
-        data = []
-        with open(input_path, 'r', encoding='utf-8') as f:
-            for line in f:
-                if has_index:
-                    json_l = json.loads(line.rstrip('\n|\r'))
-                    # hack ... 
-                    v = list(json_l.values())[0]
-                    data.append(v)
-                else:
-                    data.append(json.loads(line.rstrip('\n|\r')))
-        return data
-
     def save_meta_data(self):
         # 名前やファイルなどのメタデータをjsonで書き出し
         target_name = self.text_list[0][7:-8]
@@ -198,9 +173,9 @@ class Preprocesser():
             "save_date": save_date,
             "save_time": save_time
         }
-        json_list = self.load_jsonl(self.meta_path, has_index=False)
+        json_list = load_jsonl(self.meta_path, has_index=False)
         json_list.append(self.meta_dict)
-        self.dump_jsonl(json_list, self.meta_path)
+        dump_jsonl(json_list, self.meta_path)
 
     def get_meta_dict(self):
         # メタデータを取得する関数
