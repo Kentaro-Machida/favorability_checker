@@ -4,9 +4,10 @@ import japanize_matplotlib
 from .json_function import load_jsonl
 
 class RadarMaker():
-    def __init__(self,score_path:str ,id:str):
+    def __init__(self,score_path:str ,id:str, rader_dir:str):
         self.id = id
         self.score_path = score_path
+        self.rader_dir = rader_dir
 
     def plot_polar(self ,labels, values, imgname):
         angles = np.linspace(0, 2 * np.pi, len(labels) + 1, endpoint=True)
@@ -142,7 +143,8 @@ class RadarMaker():
         values.append(self.start_score(data_dict))
         labels = ['脈ありワード','会話バランス', '頻度', "文の長さ", '質問', '会話開始']
         name = "radar_" + str(self.id)
-        self.plot_polar(labels, values,"./data/sample_images/" + name + ".png")
+        print(self.rader_dir + name + ".png")
+        self.plot_polar(labels, values,self.rader_dir + name + ".png")
 
 def test():
     score_path = './score_output/score.jsonl'

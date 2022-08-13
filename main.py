@@ -12,7 +12,8 @@ from flask import Flask, flash, request, redirect, url_for, jsonify
 
 RAW_DIR = "./data/raw_data"  # 生の文章があるディレクトリ
 META_DIR = "./data/meta_data"  # メタデータがあるディレクトリ
-SCORE_FILE = "./data/score_output/score.jsonl"
+SCORE_FILE = "./data/score_output/score.jsonl"  # スコアを記録していくjsonl
+RADER_DIR = "./data/rader_images/"  # レーダーチャートを記録するディレクトリ
 
 # アプリケーション
 ALLOWED_EXTENSIONS = {'txt'}  # 許可する拡張子
@@ -67,7 +68,7 @@ def upload_file():
             getter = FavorabilityGetter(id=data_id, meta_dict=meta_dict)
             result = getter.all_caluculate()
 
-            rader = RadarMaker(SCORE_FILE, id=data_id)
+            rader = RadarMaker(SCORE_FILE, id=data_id, rader_dir=RADER_DIR)
             rader.saver_radar()
             
             return jsonify(result)
