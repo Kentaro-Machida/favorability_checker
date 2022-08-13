@@ -15,11 +15,12 @@ class Preprocesser():
     meta_dir: メタデータのディレクトリ
     id: データid
     """
-    def __init__(self, txt_dir, meta_dir, id:str):
+    def __init__(self, txt_dir:str, meta_path:str,out_dir:str, id:str):
         file_name = "raw_" + str(id) + ".txt"
-        meta_name = "meta_data.jsonl"
         self.txt_path = os.path.join(txt_dir, file_name)
-        self.meta_path = os.path.join(meta_dir, meta_name)
+        self.meta_path = meta_path
+        csv_name = "processed_" + str(id) + ".csv"
+        self.processed_path = os.path.join(out_dir, csv_name)
         self.df = pd.DataFrame({})  
         self.text_list = []  # 行を要素する生データのリスト
         self.id = id  # テキストid
@@ -152,11 +153,9 @@ class Preprocesser():
             current_pointer += 1    
         self.df['interval[h]'] = interval_list
                     
-    def save_as_csv(self, out_dir:str):
+    def save_as_csv(self):
         # 前処理済みデータをcsvで書き出し
-        name = "processed_" + str(self.id) + ".csv"
-        out_path = os.path.join(out_dir, name)
-        self.df.to_csv(out_path,index=None, encoding='utf-8')
+        self.df.to_csv(self.processed_path,index=None, encoding='utf-8')
 
     def save_meta_data(self):
         # 名前やファイルなどのメタデータをjsonで書き出し
@@ -185,7 +184,7 @@ class Preprocesser():
         df = self.get_basic_df()
         self.add_each_time()
         self.add_flags_interval()
-        self.save_as_csv(out_dir='./data/processed_data')
+        self.save_as_csv()
         self.save_meta_data()
 
 def test_func():

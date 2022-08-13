@@ -16,7 +16,6 @@ class FavorabilityGetter():
     meta_dict:dict
     output_json_path:str = "./data/score_output/score.jsonl"
     input_csv_dir:str = "./data/processed_data"
-    meta_path:str = "./data/meta_data/meta_data.jsonl"
     id:str = '0'
 
     def __post_init__(self):
@@ -27,8 +26,6 @@ class FavorabilityGetter():
         self.input_file_name = "processed_" + str(self.id) +".csv"
         self.input_csv_path = os.path.join(self.input_csv_dir, self.input_file_name)
         self.df = pd.read_csv(self.input_csv_path)
-
-        json_list = load_jsonl(self.meta_path, has_index=False)
 
         self.analysis_dict['usr_name'] = self.meta_dict['usr_name']
         self.analysis_dict['target_name'] = self.meta_dict['target_name']
