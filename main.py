@@ -55,11 +55,15 @@ def upload_file():
             filename = 'raw_' + data_id + '.txt'
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             
-            # 好感度の計算
-            pre = Preprocesser(txt_dir=RAW_DIR, meta_dir=META_DIR, id=data_id)
-            pre.do_all_preprocess()
-            getter = FavorabilityGetter(id=data_id)
+            # 生のテキストから前処理済みのcsvを作成
+            preprocesser = Preprocesser(txt_dir=RAW_DIR, meta_dir=META_DIR, id=data_id)
+            preprocesser.do_all_preprocess()
+            meta_dict = preprocesser.get_meta_dict()  # ユーザのメタデータを取得
+
+            # 前処理したデータから高感度スコア等を取得
+            getter = FavorabilityGetter(id=data_id, meta_dict=meta_dict)
             result = getter.all_caluculate()
+
             rader = RadarMaker(SCORE_FILE, id=data_id)
             rader.saver_radar()
             

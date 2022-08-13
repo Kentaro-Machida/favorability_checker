@@ -38,6 +38,7 @@ def load_jsonl(input_path, has_index=True) -> list:
 
 @dataclass
 class FavorabilityGetter():
+    meta_dict:dict
     output_json_path:str = "./socres/score.jsonl"
     input_csv_dir:str = "./processed_data"
     meta_path:str = "./meta_data/meta_data.jsonl"
@@ -53,7 +54,6 @@ class FavorabilityGetter():
         self.df = pd.read_csv(self.input_csv_path)
 
         json_list = load_jsonl(self.meta_path, has_index=False)
-        self.meta_dict = json_list[-1]
 
         self.analysis_dict['usr_name'] = self.meta_dict['usr_name']
         self.analysis_dict['target_name'] = self.meta_dict['target_name']

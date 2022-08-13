@@ -22,6 +22,7 @@ class Preprocesser():
         self.df = pd.DataFrame({})  
         self.text_list = []  # 行を要素する生データのリスト
         self.id = id  # テキストid
+        self.meta_dict = {}  # ユーザーのメタデータの辞書
 
     def get_basic_df(self)-> pd.DataFrame:
         """
@@ -189,7 +190,7 @@ class Preprocesser():
         name.remove(target_name)
         save_date = self.text_list[1][5:-7]
         save_time = self.text_list[1][-6:-1]
-        meta_dict = {
+        self.meta_dict = {
             "id": self.id,
             "file_path": self.txt_path,
             "usr_name": name[0],
@@ -198,8 +199,12 @@ class Preprocesser():
             "save_time": save_time
         }
         json_list = self.load_jsonl(self.meta_path, has_index=False)
-        json_list.append(meta_dict)
+        json_list.append(self.meta_dict)
         self.dump_jsonl(json_list, self.meta_path)
+
+    def get_meta_dict(self):
+        # メタデータを取得する関数
+        return self.meta_dict
 
     def do_all_preprocess(self):
         df = self.get_basic_df()
