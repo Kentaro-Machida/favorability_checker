@@ -143,7 +143,6 @@ class RadarMaker():
         values.append(self.start_score(data_dict))
         labels = ['脈ありワード','会話バランス', '頻度', "文の長さ", '質問', '会話開始']
         name = "radar_" + str(self.id)
-        print(self.rader_dir + name + ".png")
         self.plot_polar(labels, values,self.rader_dir + name + ".png")
 
 def test():
