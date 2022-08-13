@@ -2,21 +2,21 @@
 前位処理済みのcsvファイルを読み込み
 総合および、項目別のスコアJSON形式で出力する
 """
-
+import sys
+sys.path.append('./')
 import pandas as pd
 import numpy as np
-import json
 import re
 import os
 from dataclasses import dataclass
-from json_function import dump_jsonl, load_jsonl
+from .json_function import dump_jsonl, load_jsonl
 
 @dataclass
 class FavorabilityGetter():
     meta_dict:dict
-    output_json_path:str = "./socres/score.jsonl"
-    input_csv_dir:str = "./processed_data"
-    meta_path:str = "./meta_data/meta_data.jsonl"
+    output_json_path:str = "./data/score_output/score.jsonl"
+    input_csv_dir:str = "./data/processed_data"
+    meta_path:str = "./data/meta_data/meta_data.jsonl"
     id:str = '0'
 
     def __post_init__(self):
@@ -307,10 +307,9 @@ class FavorabilityGetter():
             /(np.exp(self.favorability) + np.exp(self.indifference))
         ) + lovers_addition + date_addition
 
-        output_json_path = './score_output/score.jsonl'
-        json_list = load_jsonl(output_json_path, has_index=False)
+        json_list = load_jsonl(self.output_json_path, has_index=False)
         json_list.append(self.analysis_dict)
-        dump_jsonl(json_list, output_json_path, append=False)
+        dump_jsonl(json_list, self.output_json_path, append=False)
         return self.analysis_dict
 
 def test():

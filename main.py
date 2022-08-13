@@ -1,15 +1,18 @@
-from favorability_check import FavorabilityGetter
-from preprocess import Preprocesser
-from radar_chart import RadarMaker
+from src.favorability_check import FavorabilityGetter
+from src.preprocess import Preprocesser
+from src.radar_chart import RadarMaker
+# from favorability_check import FavorabilityGetter
+# from preprocess import Preprocesser
+# from radar_chart import RadarMaker
 
 import os
 import uuid
 from datetime import datetime
 from flask import Flask, flash, request, redirect, url_for, jsonify
 
-RAW_DIR = "./raw_data"  # 生の文章があるディレクトリ
-META_DIR = "./meta_data"  # メタデータがあるディレクトリ
-SCORE_FILE = "./score_output/score.jsonl"
+RAW_DIR = "./data/raw_data"  # 生の文章があるディレクトリ
+META_DIR = "./data/meta_data"  # メタデータがあるディレクトリ
+SCORE_FILE = "./data/score_output/score.jsonl"
 
 # アプリケーション
 ALLOWED_EXTENSIONS = {'txt'}  # 許可する拡張子

@@ -7,7 +7,7 @@ import pandas as pd
 from datetime import datetime as dt
 import json
 import os
-from json_function import load_jsonl, dump_jsonl
+from .json_function import load_jsonl, dump_jsonl
 
 class Preprocesser():
     """
@@ -152,7 +152,7 @@ class Preprocesser():
             current_pointer += 1    
         self.df['interval[h]'] = interval_list
                     
-    def save_as_csv(self, out_dir='./processed_data'):
+    def save_as_csv(self, out_dir:str):
         # 前処理済みデータをcsvで書き出し
         name = "processed_" + str(self.id) + ".csv"
         out_path = os.path.join(out_dir, name)
@@ -185,7 +185,7 @@ class Preprocesser():
         df = self.get_basic_df()
         self.add_each_time()
         self.add_flags_interval()
-        self.save_as_csv()
+        self.save_as_csv(out_dir='./data/processed_data')
         self.save_meta_data()
 
 def test_func():

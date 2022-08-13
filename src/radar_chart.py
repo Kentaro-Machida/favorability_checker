@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import json
 import japanize_matplotlib
+from .json_function import load_jsonl
 
 class RadarMaker():
     def __init__(self,score_path:str ,id:str):
@@ -20,22 +20,6 @@ class RadarMaker():
         ax.set_rlim(0 ,100)
         fig.savefig(imgname)
         plt.close(fig)
-
-    def load_jsonl(self, input_path, has_index=True) -> list:
-        """
-        Read list of objects from a JSON lines file.
-        """
-        data = []
-        with open(input_path, 'r', encoding='utf-8') as f:
-            for line in f:
-                if has_index:
-                    json_l = json.loads(line.rstrip('\n|\r'))
-                    # hack ... 
-                    v = list(json_l.values())[0]
-                    data.append(v)
-                else:
-                    data.append(json.loads(line.rstrip('\n|\r')))
-        return data
 
     """
     項目ごとのスコア計算を行う。
@@ -148,7 +132,7 @@ class RadarMaker():
         return score
 
     def saver_radar(self):
-        data_dict = self.load_jsonl(self.score_path, has_index=False)[-1]
+        data_dict = load_jsonl(self.score_path, has_index=False)[-1]
         values = []
         values.append(self.good_feeling_score(data_dict))
         values.append(self.talk_balance_score(data_dict))
@@ -158,7 +142,7 @@ class RadarMaker():
         values.append(self.start_score(data_dict))
         labels = ['脈ありワード','会話バランス', '頻度', "文の長さ", '質問', '会話開始']
         name = "radar_" + str(self.id)
-        self.plot_polar(labels, values,"./sample_images/" + name + ".png")
+        self.plot_polar(labels, values,"./data/sample_images/" + name + ".png")
 
 def test():
     score_path = './score_output/score.jsonl'
