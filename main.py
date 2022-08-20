@@ -18,6 +18,7 @@ PROCESSED_DIR = "./data/processed_data"  # 前処理を行った後のデータ�
 ALLOWED_EXTENSIONS = {'txt'}  # 許可する拡張子
 
 app = Flask(__name__)
+app.secret_key="testkey"
 app.config['UPLOAD_FOLDER'] = RAW_DIR
 
 """
