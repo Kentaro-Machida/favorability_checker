@@ -36,12 +36,12 @@ def upload_file():
         # request.filesは、辞書でデータを管理している
         if 'file' not in request.files:
             flash('No file part')
-            return redirect(request.url)
+            return "error: there is no file."
         file = request.files['file']
         # ファイルがなかった際の動作
         if file.filename == '':
             flash('No selected file') # ファイルがない旨をユーザーに伝える
-            return redirect(request.url) # ?
+            return "error: there is no request."
         # ファイルがあり、許された拡張子だった場合の処理
         if file and allowed_file(file.filename):
             # ファイルがアップロードされた時間をregister_timeに格納
@@ -79,7 +79,7 @@ def upload_file():
 
             # 前処理したデータから高感度スコア等を取得
             getter = FavorabilityGetter(id=data_id, meta_dict=meta_dict,\
-                output_json_path=SCORE_FILE, input_csv_dir=PROCESSED_DIR, )
+                    output_json_path=SCORE_FILE, input_csv_dir=PROCESSED_DIR, )
             result = getter.all_caluculate()
 
             rader = RadarMaker(SCORE_FILE, id=data_id, rader_dir=RADER_DIR)
