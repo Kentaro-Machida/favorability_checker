@@ -20,6 +20,7 @@ ALLOWED_EXTENSIONS = {'txt'}  # 許可する拡張子
 app = Flask(__name__)
 app.secret_key="testkey"
 app.config['UPLOAD_FOLDER'] = RAW_DIR
+app.config["JSON_AS_ASCII"] = False
 
 """
 名前を解析し、危ないファイルでないかを確認
